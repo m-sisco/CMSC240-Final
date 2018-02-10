@@ -1,0 +1,396 @@
+/* Names: Marissa Sisco, Rachel Culpepper, Jacqueline Palmeri */
+
+[My comments enclosed in square brackets - Dr. B]
+
+[ Where is the vector of Saccade instances created? I see that it is
+  used in the DataReport class, but where does it come from? ]
+
+/*
+ * This class is used to store and retrieve the information for each saccade
+ * in the data, including its amplitude, duration, start and end times, 
+ * velocity, and its classification (as a primary or corrective saccade).
+ * The class contains methods to retrieve all of the information about a 
+ * saccade for generating a report for the data.
+ */
+class Saccade
+{
+	public:
+
+[ Constructor? I assume this is a simple data aggregation class and
+  the constructor takes parameters for all these values, since there
+  are no setter methods specified.
+]
+		/*
+		 * Returns the amplitude of the saccade.
+		 */
+		double getAmplitude();
+
+		/*
+		 * Returns the duration of the saccade in milliseconds.
+		 */
+		double getDuration();
+
+		/*
+		 * Returns the end time of the saccade in milliseconds.
+		 */
+		double getEndTime();
+
+		/*
+		 * Returns the peak velocity of the saccade in degrees/second.
+		 */
+		double getPeakVelocity();
+
+		/*
+		 * Returns the time at which the peak velocity of the saccade
+		 * occurred in milliseconds.
+		 */
+		double getPeakVelocityTime();
+
+		/*
+		 * Returns the start time of the saccade in milliseconds.
+		 */
+		double getStartTime();
+
+		/*
+		 * Returns the type of saccade. A 1 denotes a primary saccade, and a
+		 * 2 denotes a smaller saccade.
+		 */
+		int getType();
+};
+
+
+
+/*
+ * Creates a GUI for analyzing eye tracking data. The GUI allows the user to
+ * open a data file, whose contents are displayed in a TextBrowser. Once a file
+ * is open, the user is presented with options to create graphs of the data and
+ * generate a report of the data, which includes the number of saccades in the
+ * data, information about each saccade, and a measure of the accuracy of the
+ * eye movement to the movement of the target.
+ */
+
+#include <QMainWindow>
+
+class QLabel;
+class QPushButton;
+class QRadioButton;
+class QMenuBar;
+class QMenu;
+class QAction;
+class QTextBrowser;
+
+
+class GUI : public QMainWindow
+{
+	Q_OBJECT
+
+	public:
+		/*
+		 * Constructor; initializes and displays GUI elements.
+		 */
+		GUI( QWidget *parent = 0 );
+
+	signals:
+
+	private slots:
+		/*
+		 * Closes the currently open file; disabled if no file is open.
+		 */
+		void closeCurrentFile();
+
+[ Where is the data that is used to produce the graph? You seem to be
+  missing a connection between your Parse class and this class. I think
+  you either need to pass a reference to a Parse object to this method
+  so that it can extract the values it needs, or you need to have an
+  instance variable that can be set for GUI to store the current Parse
+  object here for use by the plot/report methods.
+]
+		/*
+ 		 * Takes as input an int denoting the eye whose data will be graphed 
+ 		 * (1 for left, 2 for right) and an int denoting the dimension to be 
+ 		 * graphed (1 for x, 2 for y). Creates and displays a graph depicting
+ 		 * the movement of the chosen eye in the chosen dimension compared to 
+ 		 * the movement of the target.
+		 */
+		void displayGraph( int eye, int dimension );
+
+		/*
+		 * Creates a displays a report reflecting the open data file, including 
+		 * the number of saccades, the number of target movements, information 
+		 * about the primary and corrective saccades in the data, and the
+		 * accuracy of the eye movement to the target's position.
+		 */
+		void displayReport();
+
+		/*
+		 * Creates a prompt that allows the user to select a data file to display
+		 * and opens that file, placing its name in openFileLabel and placing 
+		 * the contents of the file in openFile. If a file is already open, it
+		 * closes the currently open file before opening the new one.
+	 	 */
+		void openDataFile();
+
+		/*
+		 * Called when reportButton is pressed. Creates a prompt for the user
+		 * to select a location and name for the file, then creates a text file
+		 * containing the report for the open file.
+		 */
+		void saveReport();
+
+	private:
+		/*
+		 * A label and text pane to display the currently open file.
+		 */
+		QLabel* openFileLabel;
+		QTextBrowser* openFile;
+
+		/*
+		 * Radio buttons that allow the user to choose which dimension
+		 * to display in the generated graph.
+		 */
+		QRadioButton* xButton;
+		QRadioButton* yButton;
+
+		/*
+		 * Radio buttons that allow the user to choose which eye's data
+		 * to display in the generated graph.
+		 */
+		QRadioButton* leftButton;
+		QRadioButton* rightButton;
+
+		/*
+		 * Buttons to display the graph and report, respectively.
+		 */
+		QPushButton* graphButton;
+		QPushButton* reportButton;
+
+		/*
+		 * The menu, which will include options to open a file, close the
+		 * current file (if one is open), and exit the program.
+		 */
+		QMenuBar* menu;
+		QMenu* fileMenu;
+
+};
+
+/* 
+ * This class is used to generate and display the dialog box data report of a given data file. This dialog box 
+ * will include the name of the data file, the number of primary saccades, the number of corrective saccades, the number of
+ * target movements, the value of the measure of how well the gaze track matched the target track for this subject, and the
+ * following information for each saccade: the saccade number, the saccade type (primary or corrective), the peak velocity
+ * time (in seconds), the time of onset of the saccade (in seconds), the time of completion of the saccade (in seconds), the
+ * amplitude of the saccade, the peak velocity (in degrees per second), and the duration of the saccade (in milliseconds).
+ */
+
+#ifndef DATAREPORT_H
+#define DATAREPORT_H
+
+#include <QApplication>
+#include <QLabel>
+#include <QDialog>
+
+class QLabel;
+class QComboBox;
+class QLineEdit;
+class QPushButton;
+
+/*
+ * DataReport is a child class of QDialog
+ */
+class DataReport : public QDialog
+{
+
+private:
+
+	string fileName;
+	int numPrimary;
+	int numCorrective;
+	int numTargetMovements;
+	double matchValue; /* figure out how to measure how well the gaze track matched the target track for this subject */
+	QLabel* titleLabel;
+	QLabel* fileLabel;
+	QLabel* numPrimaryLabel;
+	QLabel* numCorrectiveLabel;
+	QLabel* numTargetMovementsLabel;
+	QLabel* matchValueLabel;
+	int currentSaccadeIndex;
+	Saccade* currentSaccade;
+	QLabel* saccadeLabel;
+	QLabel* typeLabel;
+	QLabel* peakVelocityTimeLabel;
+	QLabel* startTimeLabel;
+	QLabel* endTimeLabel;
+	QLabel* amplitudeLabel;
+	QLabel* peakVelocityLabel;
+	QLabel* durationLabel;
+	QPushButton* saveAsFileButton;
+	QPushButton* quitButton;
+	ArrayList<Saccade> saccades;
+		/* 
+		 * use (from the Saccade class):
+		 * getType(), getPeakVelocityTime(), getStartTime(), getEndTime(), getAmplitude(), getPeakVelocity(),
+		 * getDuration()
+		 */
+	
+	private slots:
+
+		/* Slot for when the "Save as file" button is clicked */
+		void saveAsFileClicked();
+
+		/* Slot for when the "Quit" button is clicked */
+		void quitClicked();
+
+public:
+
+[ How does your instance of this class get its copy of the saccades list?
+  It seems like that probably needs to be a parameter of the constructor 
+  of the class. Also, ArrayList is a Java class. You probably want the
+  STL list or vector class for that.]
+
+	/* 
+	 * Constructor will call parent class constructor to create a child object (DataReport) of the parent object (QDialog)
+	 */
+	DataReport(QWidget *parent = 0);
+
+	/* 
+	 * Displays the dialog box containing the above information for the corresponding data file read in 
+	 */
+	void displayDialogBox();
+
+	/* 
+	 * Generates and formats the information for the current Saccade object into the proper format to be displayed in the
+	 * dialogue box
+	 */
+	void formatSaccadeInfo();
+};
+
+#endif
+<<<<<<< HEAD
+
+#ifndef PARSE_H
+#define PARSE_H
+
+
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+/*
+This class reads in data from input files and stores it accordingly. The class
+parses the data by number and word to determine the information to be stored. The
+data stored is normalized so that it can be used for analysis
+
+*/
+[ Class names usually are nouns, whereas "Parse" is a verb. It seems to me
+  that the purpose of this class is to encapsulate the data from an eye 
+  test for a subject, so I would be thinking about names like TestData,
+  or SubjectData or DataSet or FileData. The class has a method that 
+  does parsing, but also methods that indicate it is really used to
+  contain the data that is parsed.
+]
+class Parse{
+
+public:
+
+//default constructor 
+Parse();
+
+//takes in a file and parses the data, storing it accordingly
+void parseFile(string filename);
+
+[ I get the feeling the next two may really only need to be private
+  helper methods called by parseFile(). I don't like their names. I
+  assume you mean that the first token in the line is a word or a
+  number and that they should be parsed accordingly. I'd rename
+  to reflect what it means if the first token is a word or a number,
+  e.g. parseMsg() vs. parseData(). I assume these methods are 
+  storing the resulting data in internal data structures.
+]
+//if the data read is a word, gathers the needed information and stores
+void parseWord(string line);
+
+//if the data read is numbers, gathers the needed information and stores
+void parseNum(string line);
+
+//gets the timestamp
+double getTime(double[] time);
+
+[ What is the meaning if the index parameter for these methods? 
+  I can guess, but I shouldn't have to. The documentation isn't
+  adequate here. ]
+//gets the left x coordinate
+double getLx(int index);
+
+//gets the left y coordinate
+double getLy(int index);
+
+//gets the right x coordinate
+double getRx(int index);
+
+//gets the right y coordinate
+double getRy(int index);
+
+//gets the left pupil diameter
+double getLPupil(int index);
+
+//gets the right pupil diameter
+double getRPupil(int index);
+
+//gets the left x velocity
+double getLXVel(int index);
+
+//gets the right x velocity
+double getRXVel(int index);
+
+//gets the left y velocity
+double getLYVel(int index);
+
+//gets the right y velocity
+double getRYVel(int index);
+
+//gets the x resolution
+double getXres(int index);
+
+//gets the y resolution
+double getYres(int index);
+
+[ Maybe normalize() is a private helper that gets called from parseFile()? 
+  If the user is required to know something about what order to call
+  the methods of your class to make things come out right, things are
+  too complicated.
+]
+/*
+normalizes the data so that the coordinate system starts 
+in the center of the screen and accounts for resolution.
+The method takes in a position array and changes the data 
+accordingly
+*/
+void normalize(double[] position);
+
+
+private:
+
+double[] timestamp;
+double[] leye_x;
+double[] leye_y;
+double[] reye_x;
+double[] reye_y;
+double[] l_pupil;
+double[] r_pupil;
+double[] leye_xvel;
+double[] leye_yvel;
+double[] reye_xvel;
+double[] reye_yvel;
+double[] xres;
+double[] yres;
+
+
+};
+
+#endif
+
+
+
+=======
+>>>>>>> a04f9f4fe878ec584ab43a4bd2fc44c1a8b01898

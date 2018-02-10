@@ -1,0 +1,33 @@
+***How to Use the Program***
+First run the program so that the main GUI menu shows up. From there, click open and choose the file to open. 
+Then, click the button for left or right eye, choose the x or y coordinate and click graph to graph the data
+or click Data Report in order to see the numerical values created from the data file.
+
+
+***File parsing***
+
+The method for parsing involves taking an inut file and splitting it line by line. The class takes the
+line and separates it by lines starting with nubers and lines starting with letters. This is because the
+data could then be separated by the eye data and the target position data. The class then separates
+the line into small strings representing each value of data to be stored accordingly in a vector. Next,
+the data is normalized so that the x,y coordinates are no longer the center of the screen. The velocity
+is then smoothed by using a moving velocity with value of 50 points to perform the smoothing. The vectors
+can then be used by the classes to plot the data.
+
+***Graphing***
+We used QCustomPlot to create the graphs. We chose it because it is easy to use: adding it just required downloading the files and including the header file in the graphing code, the methods are straightforward to use, and they included several tutorials and examples to create different kinds of graphs. We used two different instances of QCustomPlot for the two different graphs required. These are contained in a class that inherits from QDialog. This class takes the eye and dimension required for the graph, collects the data into several QVectors, and sets these as the data for the QCustomPlot graphs. Then it uses methods from QCustomPlot to plot the data, set the type of plot, set the axes, etc and adds the QCustomPlots onto the dialog, which the GUI displays.
+
+
+***Measure for gaze accuracy***
+We chose to measure gaze accuracy as the number of corrective saccades per target movement. This is able to measure the amount  that the eye moves after a primary saccade in order to re-focus on a previous target movement. Therefore, a lower measurement indicates a more accurate gaze track, whereas a higher measurement indicates a less accurate gaze track.
+
+
+***Saccade identification and classification***
+After looking at the data, we classified any interval where the velocities were between -15 and 15 as a fixation. Any interval where the velocities were higher than 15 or lower than -15 was classified as a saccade. The program marks the first record of higher (or lower) velocity as the beginning of the saccade and iterates to the point where the velocity is no longer above 15 (or below -15), keeping track of the peak velocity and the time it occurs on the way. It then creates a saccade instance with all of the information collected about the saccade.
+
+Once all of the saccades have been identified, their average amplitude is taken. A saccade with amplitude that is higher than the average is classified as primary, and a saccade with amplitude lower than the average is classified as corrective.
+
+
+***Issues***
+As far as we know, none.
+
